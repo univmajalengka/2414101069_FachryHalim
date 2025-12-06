@@ -1,0 +1,107 @@
+Tentu, saya akan menyusun uraian error berdasarkan daftar lengkap yang Anda berikan, disajikan dalam format Markdown (`.md`) yang sesuai untuk dokumentasi proyek.
+
+-----
+
+```markdown
+# 📝 Dokumentasi Analisis Error — Tugas Proyek J.620100.016.01 & J.620100.017.02
+
+Dokumentasi ini menguraikan sembilan (9) error dan isu yang teridentifikasi pada kode sumber PHP dan SQL yang diberikan, meliputi masalah sintaks, logika, keamanan, dan konfigurasi.
+
+---
+
+## Daftar Error Teridentifikasi dan Solusinya
+
+### Error 1 — Tag DOCTYPE Tidak Benar
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | (Tidak fatal, namun menyebabkan HTML tidak valid). |
+| **Jenis** | Format / Markup |
+| **File** | `form-daftar.php` |
+| **Letak** | Baris paling atas (`<DOCTYPE >`) |
+| **Penyebab** | Deklarasi DOCTYPE tidak valid; harus diikuti oleh `html`. |
+| **Perbaikan** | Ganti dengan `<!DOCTYPE html>` dan tambahkan `<meta charset="utf-8">` di dalam `<head>` untuk standar modern. |
+
+### Error 2 — Variabel PHP Tidak Dideklarasikan (`$sekolah`)
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | `Notice: Undefined variable: sekolah in proses-pendaftaran-2.php on line X` |
+| **Jenis** | Undefined Variable / Logic |
+| **File** | `proses-pendaftaran-2.php` |
+| **Letak** | [cite_start]Penugasan variabel `sekolah = $_POST['sekolah_asal'];` [cite: 70] |
+| **Penyebab** | Hilangnya tanda dolar (`$`) di depan variabel `$sekolah` saat pendefinisian. |
+| **Perbaikan** | Gunakan `$sekolah = $_POST['sekolah_asal'];` dan pastikan nama variabel konsisten di seluruh skrip. |
+
+### Error 3 — SQL Keyword `VALUE` (Bukan `VALUES`)
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | MySQL Error (Syntax) atau *query* gagal. |
+| **Jenis** | SQL Syntax / Logic |
+| **File** | `proses-pendaftaran-2.php` |
+| **Letak** | [cite_start]Query `INSERT ... VALUE (...)` [cite: 72] |
+| **Penyebab** | *Keyword* standar yang benar untuk penyisipan data adalah `VALUES`, bukan `VALUE`. |
+| **Perbaikan** | Gunakan `VALUES` dan **Wajib** terapkan *Prepared Statements* untuk mencegah Error 4. |
+
+### Error 4 — Potensi SQL Injection (Keamanan)
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | Tidak ada pesan langsung, namun aplikasi **rentan** diserang. |
+| **Jenis** | Security (SQL Injection) |
+| **File** | `proses-pendaftaran-2.php` |
+| **Penyebab** | [cite_start]Langsung menyisipkan variabel ke dalam *string* SQL tanpa proses *escaping* atau *binding* parameter. [cite: 72, 73] |
+| **Perbaikan** | **Implementasikan Best Practice:** Gunakan **Prepared Statements** (`mysqli_prepare` dan `mysqli_stmt_bind_param`) untuk memisahkan logika *query* dan data. |
+
+### Error 5 — `header()` Setelah Output (Kemungkinan "Headers Already Sent")
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | `Warning: Cannot modify header information - headers already sent by (output started at ...)` |
+| **Jenis** | Runtime / Warning |
+| **File** | `proses-pendaftaran-2.php` (atau `form-daftar.php` jika ada spasi/BOM sebelum `<?php`) |
+| **Penyebab** | Adanya *output* (spasi, HTML, `echo`, atau karakter *Byte Order Mark*/BOM) sebelum pemanggilan fungsi `header()`. |
+| **Perbaikan** | Pastikan **tidak ada *output* sama sekali** sebelum *header* PHP dan simpan file dalam *encoding* **tanpa BOM** (misalnya UTF-8 tanpa BOM). |
+
+### Error 6 — Koneksi Database Gagal (Credential Mismatch)
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | (Contoh)[cite_start]: `Failed to connect to MySQL: Access denied for user 'root'@'localhost' (using password: YES)` [cite: 93] |
+| **Jenis** | Runtime / Connection Error |
+| **File** | [cite_start]`koneksi.php` [cite: 84] |
+| **Penyebab** | [cite_start]Kredensial *user* atau *password* yang digunakan di `koneksi.php` tidak cocok dengan konfigurasi MySQL lokal, atau database `pendaftaran_siswa` belum dibuat. [cite: 87, 88, 89] |
+| **Perbaikan** | Perbarui kredensial (`$password`) sesuai *environment* (default XAMPP biasanya `""`), dan pastikan *script* `calon_siswa.sql` sudah dieksekusi. |
+
+### Error 7 — Charset / Encoding (Potensi Tampilan Karakter Aneh)
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | Tidak ada, namun karakter non-ASCII (seperti é, ü, dll.) bisa ditampilkan kacau (mojibake). |
+| **Jenis** | Konfigurasi |
+| **File** | `koneksi.php` |
+| **Penyebab** | *Connection charset* antara PHP dan MySQL tidak diatur secara eksplisit. |
+| **Perbaikan** | Gunakan `mysqli_set_charset($db, 'utf8mb4')` setelah koneksi berhasil untuk memastikan komunikasi karakter yang benar. |
+
+### Error 8 — Redirect ke `indek.ph` (Typo)
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | *Redirect* gagal menemukan halaman (HTTP 404). |
+| **Jenis** | Logic / Typo |
+| **File** | `proses-pendaftaran-2.php` |
+| **Letak** | [cite_start]`header('Location: indek.ph?status=gagal');` [cite: 79] |
+| **Penyebab** | Salah ketik pada nama *file* tujuan; seharusnya `index.php`. |
+| **Perbaikan** | Perbaiki *typo* menjadi `header('Location: index.php?status=gagal');`. |
+
+### Error 9 — Tidak Melakukan Pengecekan Method Request (`POST`)
+
+| Kategori | Detail |
+| :--- | :--- |
+| **Pesan Error** | *Notices* jika *script* diakses langsung via `GET` (variabel `$_POST` tidak terdefinisi). |
+| **Jenis** | Logic / Access Control |
+| **File** | `proses-pendaftaran-2.php` |
+| **Penyebab** | [cite_start]Hanya mengandalkan `isset($_POST['daftar'])` [cite: 64] tanpa memverifikasi bahwa *request* berasal dari metode `POST`. |
+| **Perbaikan** | Tambahkan pengecekan yang lebih ketat: `if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['daftar']))`. |
+```
